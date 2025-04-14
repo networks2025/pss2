@@ -1,36 +1,56 @@
-# 🧪 Assignment: Gopher Server with Threading Support
+# 🧪 Assignment: Gopher Server with Threading Support (Java Edition)
 
 ## 🎯 Goal
 
-Create a basic **Gopher server** and **Gopher client** in **Node.js with TypeScript**. The server must support **threading**, meaning it should spawn a **new thread** (using `worker_threads`) for each incoming connection.
+Create a basic **Gopher server** and **Gopher client** in **Java**. The server must support **threading**, meaning it should spawn a **new thread** for each incoming client connection.
 
 ---
 
 ## 📌 Requirements
 
-### ✅ Gopher Server
+### ✅ Gopher Server (`GopherServer.java`)
 
-- Built with Node.js and TypeScript
+- Built using Java SE (no frameworks)
 - Listens for TCP connections on a configurable port (default: `70`)
 - For **each client connection**, it:
-  - Spawns a **new thread** using the `worker_threads` module
-  - Passes the Gopher **selector** (text line from client) to the worker
-  - Receives a **response string** from the worker
-  - Sends the response back to the client and closes the connection
+  - Accepts the connection using a `ServerSocket`
+  - Spawns a **new thread** using the `Thread` class
+  - Delegates the connection to a `Worker` instance
 
-### ✅ Gopher Worker
+### ✅ Worker (`Worker.java`)
 
-- Receives the selector string via `workerData`
-- Constructs a valid **Gopher menu** response:
-  - Each line ends with `\r\n`
-  - The menu ends with a single dot on a line: `.`
-- Sends the response to the main thread via `postMessage`
+- Handles each client connection in its own thread
+- Reads selector requests line-by-line from the client
+- For each selector:
+  - If the selector contains `"alien"`, it returns the content of `alien.gmi`
+  - Otherwise, it returns `"❌ Path Not Found"`
+- Sends responses back to the client, terminated with:
+  - Each line ending in `\r\n`
+  - The end of a response marked by a line containing only `.`
+- Logs the **thread ID** and a **unique socket identifier** for debugging
 
-### ✅ Gopher Client
+### ✅ Gopher Client (`GopherClient.java`)
 
-- Connects to the Gopher server
-- Sends a selector string (or just a blank line `\r\n`)
-- Receives and prints the response from the server
+- Connects to the Gopher server via TCP
+- Allows user to type Gopher selectors from the terminal
+- Sends each selector to the server followed by `\r\n`
+- Receives the response from the server and prints it
+- Supports an `exit` command to close the connection
 
 ---
 
+## 📁 Files
+
+- `GopherServer.java` — main server accepting connections
+- `Worker.java` — worker class handling each connection in a thread
+- `GopherClient.java` — command-line client for testing
+- `alien.gmi` — sample file returned for `/alien` request
+
+---
+
+## 🚀 How to Run
+
+1. **Compile the code:**
+   ```bash
+   javac GopherServer.java Worker.java GopherClient.java
+   ```
